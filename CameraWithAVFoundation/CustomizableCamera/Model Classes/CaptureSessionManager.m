@@ -6,6 +6,12 @@
 //  Copyright (c) 2014 Gabriel Alvarado. All rights reserved.
 //
 
+#ifdef __OBJC__
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import <CoreData/CoreData.h>
+#endif
+
 #import "CaptureSessionManager.h"
 #import <ImageIO/ImageIO.h>
 
@@ -116,8 +122,8 @@
     if ([device hasTorch] && [device hasFlash])
     {
         [device lockForConfiguration:nil];
-        if (enableTorch) { [device setTorchMode:AVCaptureTorchModeOn]; }
-        else { [device setTorchMode:AVCaptureTorchModeOff]; }
+        if (enableTorch) { [device setFlashMode:AVCaptureFlashModeOn]; }
+        else { [device setFlashMode:AVCaptureFlashModeOff]; }
         [device unlockForConfiguration];
     }
 }
