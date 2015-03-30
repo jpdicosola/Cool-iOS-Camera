@@ -60,16 +60,34 @@
     return self;
 }
 
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        _animationInProgress = NO;
+        [self setupCaptureManager:RearFacingCamera];
+        cameraBeingUsed = RearFacingCamera;
+        [self composeInterface];
+        
+        [[_captureManager captureSession] startRunning];
+    }
+    return self;
+}
+
 #pragma mark - Setup
 
 -(void)setupCaptureManager:(CameraType)camera {
     
-    //If previous intance of a 'CaptureSessionManager' object exists, remove it's preview layer
-    if (_captureManager) [_captureManager.previewLayer removeFromSuperlayer];
+    // remove existing input
+    AVCaptureInput* currentCameraInput = [self.captureManager.captureSession.inputs objectAtIndex:0];
+    [self.captureManager.captureSession removeInput:currentCameraInput];
+    
     _captureManager = nil;
     
     //Create and configure 'CaptureSessionManager' object
     _captureManager = [CaptureSessionManager new];
+    
+    // indicate that some changes will be made to the session
+    [self.captureManager.captureSession beginConfiguration];
     
     if (_captureManager) {
         
@@ -78,11 +96,19 @@
         [_captureManager initiateCaptureSessionForCamera:camera];
         [_captureManager addStillImageOutput];
         [_captureManager addVideoPreviewLayer];
+        [self.captureManager.captureSession commitConfiguration];
         
         //Preview Layer setup
         CGRect layerRect = self.layer.bounds;
         [_captureManager.previewLayer setBounds:layerRect];
         [_captureManager.previewLayer setPosition:CGPointMake(CGRectGetMidX(layerRect),CGRectGetMidY(layerRect))];
+        
+        //Apply animation effect to the camera's preview layer
+        CATransition *applicationLoadViewIn =[CATransition animation];
+        [applicationLoadViewIn setDuration:0.6];
+        [applicationLoadViewIn setType:kCATransitionReveal];
+        [applicationLoadViewIn setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn]];
+        [_captureManager.previewLayer addAnimation:applicationLoadViewIn forKey:kCATransitionReveal];
         
         //Add to self.view's layer
         [self.layer addSublayer:_captureManager.previewLayer];
@@ -139,6 +165,7 @@
         
         //Add the flash button
         _cameraFlash = [CameraFlashButton new];
+        
         if (_cameraFlash) {
             _cameraFlash.frame = (CGRect){0,0, barButtonItemSize};
             _cameraFlash.center = CGPointMake(_topBarView.center.x * 0.80, _topBarView.center.y);
@@ -161,7 +188,8 @@
             _cameraDismiss.frame = (CGRect){0,0, barButtonItemSize};
             _cameraDismiss.center = CGPointMake(20, _topBarView.center.y);
             _cameraDismiss.tag = DismissButtonTag;
-            [_topBarView addSubview:_cameraDismiss];
+//            [_topBarView addSubview:_cameraDismiss];
+            //hide dismiss for now
         }
         
         //Attribute and configure all buttons in the bar's subview
@@ -217,9 +245,20 @@
 }
 
 - (void)onTapFlashButton {
+    
     BOOL enable = !self.captureManager.isTorchEnabled;
     self.captureManager.enableTorch = enable;
+    
+    //toggle highlight
+    _cameraFlash.isPressed = enable;
+    
+    [UIView animateWithDuration:0.6 animations:^{
+        _cameraFlash.alpha = 0;
+        _cameraFlash.alpha = 1;
+        _cameraFlash.setNeedsDisplay;
+    }];
 }
+
 
 - (void)onTapToggleButton {
     if (cameraBeingUsed == RearFacingCamera) {
@@ -310,6 +349,7 @@
                 
                 _cameraFlash.transform = transform;
                 _cameraFlash.center = CGPointMake(_topBarView.center.x * 0.80, _topBarView.center.y);
+               
                 
                 _cameraToggle.transform = transform;
                 _cameraToggle.center = CGPointMake(_topBarView.center.x * 1.20, _topBarView.center.y);

@@ -9,10 +9,15 @@
 #import "CameraFlashButton.h"
 #import "CameraStyleKitClass.h"
 
+
+
+
 @implementation CameraFlashButton
 
+
+
 - (void)drawRect:(CGRect)rect {
-    [CameraStyleKitClass drawCameraFlashWithFrame:self.bounds];
+    [CameraStyleKitClass drawCameraFlashWithFrame:self.bounds pressed:self.isPressed];
 }
 
 @end

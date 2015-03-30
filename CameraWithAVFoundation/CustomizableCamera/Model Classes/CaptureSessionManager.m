@@ -6,12 +6,6 @@
 //  Copyright (c) 2014 Gabriel Alvarado. All rights reserved.
 //
 
-#ifdef __OBJC__
-#import <UIKit/UIKit.h>
-#import <Foundation/Foundation.h>
-#import <CoreData/CoreData.h>
-#endif
-
 #import "CaptureSessionManager.h"
 #import <ImageIO/ImageIO.h>
 
@@ -119,7 +113,7 @@
     _enableTorch = enableTorch;
     
     AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-    if ([device hasTorch] && [device hasFlash])
+    if ([device hasFlash])
     {
         [device lockForConfiguration:nil];
         if (enableTorch) { [device setFlashMode:AVCaptureFlashModeOn]; }

@@ -59,13 +59,15 @@
     }
 }
 
-+ (void)drawCameraFlashWithFrame: (CGRect)frame
-{
++ (void)drawCameraFlashWithFrame: (CGRect)frame pressed: (BOOL)pressed{
     //// General Declarations
     CGContextRef context = UIGraphicsGetCurrentContext();
 
     //// Color Declarations
     UIColor* color = [UIColor colorWithRed: 1 green: 1 blue: 1 alpha: 0.795];
+    if (pressed) {
+        color = [UIColor colorWithRed:0.99 green:0.93 blue:0.22 alpha:.795];
+    }
 
 
     //// Subframes

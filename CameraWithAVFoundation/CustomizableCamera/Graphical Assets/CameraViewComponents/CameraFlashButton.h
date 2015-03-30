@@ -10,4 +10,6 @@
 
 @interface CameraFlashButton : UIButton
 
+    @property BOOL isPressed;
+
 @end
